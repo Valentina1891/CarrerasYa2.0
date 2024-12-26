@@ -1,0 +1,17 @@
+{
+  "name": "backend2.0xd",
+  "version": "1.0.0",
+  "description": "prueba back",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "Valentina",
+  "license": "ISC",
+  "dependencies": {
+    "backend2.0xd": "file:",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.7.3"
+  }
+}
