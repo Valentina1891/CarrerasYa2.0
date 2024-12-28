@@ -81,7 +81,7 @@ router.get('/iniciarPreguntas', async (req, res) => {
   try {
     const areasActivas = await obtenerAreasActivas(usuarioId);
     const preguntasPendientes = {};
-    consolw.log(areasActivas);
+    console.log(areasActivas);
     // Inicializar preguntas pendientes por área
     for (const area of areasActivas) {
       const preguntas = await PreguntaNivel2.find({ AREA_ID: area });
