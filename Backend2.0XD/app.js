@@ -7,16 +7,15 @@ const app = express();
 
 
 // Conectar a la base de datos MongoDB
-mongoose.connect("mongodb+srv://vvaldiviam:1891321228@cluster0.i08su.mongodb.net/vocacional?retryWrites=true&w=majority", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+mongoose.connect("mongodb+srv://vvaldiviam:1891321228@cluster0.i08su.mongodb.net/vocacional?retryWrites=true&w=majority")
+  .then(() => console.log("Conexión exitosa a MongoDB"))
+  .catch(err => console.error("Error al conectar a MongoDB:", err.message));
+
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Usa el router con el prefijo '/webapi'
 app.use(router);
 
 // Exporta la aplicación (importante para Phusion Passenger)
