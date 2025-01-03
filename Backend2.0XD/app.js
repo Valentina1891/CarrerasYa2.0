@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // Usa el router con el prefijo '/webapi'
-app.use("/api", router);
+app.use(router);
 
 // Exporta la aplicación (importante para Phusion Passenger)
 
