@@ -16,7 +16,7 @@ mongoose.connect("mongodb+srv://vvaldiviam:1891321228@cluster0.i08su.mongodb.net
 app.use(cors());
 app.use(express.json());
 
-app.use(router);
+app.use('/api',router);
 
 // Exporta la aplicación (importante para Phusion Passenger)
 
