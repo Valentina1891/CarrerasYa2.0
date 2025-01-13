@@ -4,7 +4,8 @@
   "description": "prueba back",
   "main": "app.js",
   "scripts": {
-    "test": "node app.js"
+    "test": "node app.js",
+    "install-build": "npm install"
   },
   "author": "Valentina",
   "license": "ISC",
