@@ -4,6 +4,7 @@
   "description": "prueba back",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "node app.js",
     "install-build": "npm install"
   },
