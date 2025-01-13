@@ -81,21 +81,18 @@ router.get('/iniciarPreguntas', async (req, res) => {
   try {
     const areasActivas = await obtenerAreasActivas(usuarioId);
     const preguntasPendientes = {};
-    console.log(areasActivas);
-    // Inicializar preguntas pendientes por área
-    for (const area of areasActivas) {
-      const preguntas = await PreguntaNivel2.find({ AREA_ID: area });
-      preguntasPendientes[area] = preguntas;
+
+    for (const areaId of areasActivas) {
+      const preguntas = await PreguntaNivel2.find({ AREA_ID: areaId });
+      preguntasPendientes[areaId] = preguntas;
     }
 
-    // Guardar el estado de sesión para el usuario
     sessionStatus[usuarioId] = { 
       preguntasPendientes, 
       respuestasNegativasPorArea: {}, 
       areasDescartadas: new Set() 
     };
 
-    // Enviar la primera pregunta
     enviarPregunta(usuarioId, res);
   } catch (error) {
     console.error("Error al iniciar el proceso de preguntas:", error);
@@ -194,25 +191,23 @@ const obtenerAreasActivas = async (usuarioId) => {
     const palabrasClaveUsuario = palabrasUsuario.map((palabra) => palabra.PALABRA.toLowerCase());
 
     const todasAreas = await Area.find({});
-    const coincidenciasPorArea = todasAreas
-      .filter(area => area.ID) // Filtrar solo áreas con ID válido
-      .map(area => {
-        const palabrasArea = area.PALABRAS_C.split(',').map(p => p.trim().toLowerCase());
-        const coincidencias = palabrasClaveUsuario.filter(p => palabrasArea.includes(p)).length;
-        return { areaId: area.ID, coincidencias };
-      });
+    const coincidenciasPorArea = todasAreas.map(area => {
+      const palabrasArea = area.PALABRAS_C.split(',').map(p => p.trim().toLowerCase());
+      const coincidencias = palabrasClaveUsuario.filter(p => palabrasArea.includes(p)).length;
+      return { areaId: area.ID, coincidencias };
+    });
 
+    // Ordenar por coincidencias descendente
     coincidenciasPorArea.sort((a, b) => b.coincidencias - a.coincidencias);
-    const top5Coincidencias = coincidenciasPorArea.slice(0, 2);
-    const ultimoPuntajeTop5 = top5Coincidencias[top5Coincidencias.length - 1].coincidencias;
-    const areasConIgualPuntaje = coincidenciasPorArea.filter(area => area.coincidencias === ultimoPuntajeTop5);
-    const areasFinales = [...new Set([...top5Coincidencias, ...areasConIgualPuntaje])].map(area => area.areaId);
 
-    return areasFinales.length ? areasFinales : []; // Devuelve un array vacío si no hay coincidencias
+    // Tomar las áreas con las mejores coincidencias
+    const topAreas = coincidenciasPorArea.slice(0, 5); // Ajusta el número según lo requerido
+    return topAreas.map(area => area.areaId); // Retornar solo los IDs de las áreas seleccionadas
   } catch (error) {
     console.error("Error al obtener áreas activas:", error);
-    return []; // En caso de error, devuelve un array vacío
+    return [];
   }
 };
+
 
 module.exports = router;
