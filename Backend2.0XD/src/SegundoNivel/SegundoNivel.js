@@ -203,7 +203,7 @@ const obtenerAreasActivas = async (usuarioId) => {
       });
 
     coincidenciasPorArea.sort((a, b) => b.coincidencias - a.coincidencias);
-    const top5Coincidencias = coincidenciasPorArea.slice(0, 5);
+    const top5Coincidencias = coincidenciasPorArea.slice(0, 2);
     const ultimoPuntajeTop5 = top5Coincidencias[top5Coincidencias.length - 1].coincidencias;
     const areasConIgualPuntaje = coincidenciasPorArea.filter(area => area.coincidencias === ultimoPuntajeTop5);
     const areasFinales = [...new Set([...top5Coincidencias, ...areasConIgualPuntaje])].map(area => area.areaId);
