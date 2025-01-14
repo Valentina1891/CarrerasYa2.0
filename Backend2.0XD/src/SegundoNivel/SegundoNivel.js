@@ -69,7 +69,7 @@ const finalizarNivel2 = async (usuarioId) => {
   }
 };
 
-
+ 
 // Endpoint para iniciar el proceso de preguntas
 router.get('/iniciarPreguntas', async (req, res) => {
   const { usuarioId } = req.query;
