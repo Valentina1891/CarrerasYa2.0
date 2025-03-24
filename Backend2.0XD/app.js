@@ -21,9 +21,7 @@ app.use('/api',router);
 // Exporta la aplicación (importante para Phusion Passenger)
 
 console.log('servidor escuchando');
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+
   module.exports = app;
 
   
