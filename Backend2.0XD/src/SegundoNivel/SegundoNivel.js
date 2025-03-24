@@ -121,10 +121,15 @@ const enviarPregunta = (usuarioId, res) => {
 };
 
 // Endpoint para recibir la respuesta del usuario
+// Endpoint para recibir la respuesta del usuario
 router.post('/responderPregunta', async (req, res) => {
   const { usuarioId, areaId, preguntaId, respuesta } = req.body;
 
+  console.log("📩 Petición recibida en /responderPregunta");
+  console.log("➡️ Datos:", req.body);
+
   if (!sessionStatus[usuarioId]) {
+    console.error("❌ Sesión no encontrada para el usuario:", usuarioId);
     return res.status(400).json({ mensaje: 'Sesión de usuario no encontrada' });
   }
 
@@ -133,9 +138,8 @@ router.post('/responderPregunta', async (req, res) => {
   try {
     if (respuesta === 'sí') {
       const puntaje = req.body.puntaje;
-      console.log("Datos recibidos:", { usuarioId, areaId, preguntaId, respuesta, puntaje });
 
-      // Guardar la respuesta en la base de datos
+      // Guardar respuesta
       await RespuestaNivel2.create({
         USUARIO_ID: new mongoose.Types.ObjectId(usuarioId),
         PREGUNTA_ID: new mongoose.Types.ObjectId(preguntaId),
@@ -144,44 +148,47 @@ router.post('/responderPregunta', async (req, res) => {
         NIVEL: 2
       });
 
-      // Verificar que el usuario existe antes de agregar palabras clave
+      console.log(`✅ Respuesta registrada. Puntaje: ${puntaje}, Usuario: ${usuarioId}`);
+
       const usuario = await Usuario.findById(usuarioId);
       if (!usuario) {
-        console.error("Usuario no encontrado al intentar agregar palabras clave.");
+        console.error("❌ Usuario no encontrado para palabras clave");
         return res.status(404).json({ mensaje: 'Usuario no encontrado' });
       }
 
-      // Agregar palabras clave al perfil del usuario
       const pregunta = await PreguntaNivel2.findById(preguntaId);
       const palabrasClave = [pregunta.PALABRA_CLAVE_1, pregunta.PALABRA_CLAVE_2].filter(Boolean);
+
+      console.log("🔑 Palabras clave a agregar:", palabrasClave);
       await agregarPalabrasClave(usuarioId, palabrasClave);
-      console.log("Palabras clave agregadas correctamente a palabras_usuario");
+      console.log("✅ Palabras clave agregadas al usuario");
     } else if (respuesta === 'no') {
       estado.respuestasNegativasPorArea[areaId] = (estado.respuestasNegativasPorArea[areaId] || 0) + 1;
 
-      // Si hay 6 respuestas negativas, descartar el área
       if (estado.respuestasNegativasPorArea[areaId] >= 6) {
         estado.areasDescartadas.add(areaId);
-        console.log(`Área ${areaId} descartada por exceso de respuestas negativas`);
+        estado.preguntasPendientes[areaId] = [];
+        console.log(`🚫 Área ${areaId} descartada por exceso de respuestas negativas`);
       }
     }
 
-    // Verificar si todas las preguntas han sido respondidas
-    const todasPreguntasCompletadas = Object.values(estado.preguntasPendientes).every(area => area.length === 0);
+    const todasRespondidas = Object.values(estado.preguntasPendientes).every(arr => arr.length === 0);
 
-    if (todasPreguntasCompletadas) {
-      // Llamar a finalizarNivel2 y luego responder al frontend
+    if (todasRespondidas) {
       await finalizarNivel2(usuarioId);
-      return res.status(200).json({ mensaje: 'Nivel 2 completado y área actualizada.' });
-    } else {
-      // Enviar la siguiente pregunta si aún quedan preguntas pendientes
-      enviarPregunta(usuarioId, res);
+      console.log("🏁 Todas las preguntas completadas. Nivel 2 terminado.");
+      console.log("✅ Nivel 2 finalizado, se envía finalizado: true al frontend"); // ← ESTE ES EL LOG QUE PEDISTE
+      return res.status(200).json({ finalizado: true });
     }
+    
+
+    enviarPregunta(usuarioId, res);
   } catch (error) {
-    console.error("Error al procesar la respuesta:", error);
+    console.error("❌ Error al procesar la respuesta:", error);
     res.status(500).json({ mensaje: 'Error al procesar la respuesta', error: error.message });
   }
 });
+
 
 
 // Función auxiliar para obtener áreas activas basadas en coincidencias de palabras clave
